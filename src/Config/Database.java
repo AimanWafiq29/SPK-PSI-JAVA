@@ -8,7 +8,7 @@ public class Database {
 
     public static Connection getConnection() {
         Connection conn = null;
-        String url = "jdbc:mysql://localhost:3306/test";
+        String url = "jdbc:mysql://localhost:3306/psi";
         String user = "root";
         String password = "";
         try {

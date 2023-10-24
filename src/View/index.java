@@ -24,6 +24,7 @@ import Service.NilaiService;
 import Service.NilaiServiceImpl;
 import Service.SubKriteriaService;
 import Service.SubKriteriaServiceImpl;
+import java.text.DecimalFormat;
 
 public class index {
 
@@ -57,6 +58,7 @@ public class index {
         double[] totalNilaiVariasiPreferensi = hitungTotalTiapKriteria(nilaiVariasiPreferensiList);
         double[] hitungNilaiPreferensi = hitungNilaiPreferensi(totalNilaiVariasiPreferensi);
         double totalNilaiDalamPreferensi = totalNilaiDalamPreferensi(totalNilaiVariasiPreferensi);
+        double[] NilaiPreferensi = NilaiPreferensi(totalNilaiVariasiPreferensi);
         double[] menentukanBobotKriteria = menentukanBobotKriteria(totalNilaiVariasiPreferensi, totalNilaiDalamPreferensi);
         ArrayList<PSI> menghitungNilaiPreferensi = menghitungNilaiPreferensi(alternatifList, kriteriaList, subKriteriaList, nilaiList, MinMax, menentukanBobotKriteria);
 
@@ -103,10 +105,11 @@ public class index {
 
         // Menampilkan normalisasi nilai matriks
         System.out.println("\nnilai Variasi PreferensiList:");
+        DecimalFormat df = new DecimalFormat("0.0000");
         for (PSI psi : nilaiVariasiPreferensiList) {
             System.out.print(psi.getAlternatif() + ": ");
             for (double nilai : psi.getBobotKriteria()) {
-                System.out.print(nilai + " ");
+                System.out.print(df.format(nilai) + " ");
             }
             System.out.println();
         }
@@ -124,13 +127,6 @@ public class index {
         System.out.println("");
         // Menampilkan nilai preferensi
         System.out.println("Menentukan Bobot Kriteria:");
-        for (int i = 0; i < hitungNilaiPreferensi.length; i++) {
-            System.out.println("𝛺" + (i + 1) + " = " + hitungNilaiPreferensi[i]);
-        }
-
-        System.out.println("");
-        // Menampilkan nilai preferensi
-        System.out.println("Nilai Preferensi:");
         for (int i = 0; i < menentukanBobotKriteria.length; i++) {
             System.out.println("W" + (i + 1) + " = " + menentukanBobotKriteria[i]);
         }
@@ -197,6 +193,9 @@ public class index {
             for (Kriteria kriteria : kriteriaList) {
                 double nilaiSubKriteria = 0.0;
                 for (Nilai nilai : nilaiList) {
+                    System.out.println(
+                            nilai.getId_Alternatif() + "==" + alternatif.getId() + "&&" + nilai.getId_Kriteria() + "==" + kriteria.getId()
+                    );
                     if (nilai.getId_Alternatif() == alternatif.getId() && nilai.getId_Kriteria() == kriteria.getId()) {
                         for (SubKriteria subKriteria : subKriteriaList) {
                             if (subKriteria.getId() == nilai.getId_SubKriteria()) {
@@ -307,11 +306,13 @@ public class index {
     ) {
         // Menghitung nilai rata-rata dari nilai normalisasi
         double[] nilaiRataRata = new double[kriteriaList.size()];
+
         for (int j = 0; j < kriteriaList.size(); j++) {
             double totalNilai = 0.0;
             for (int i = 0; i < alternatifList.size(); i++) {
                 Alternatif alternatif = alternatifList.get(i);
                 double nilaiSubKriteria = 0.0;
+
                 for (Nilai nilai : nilaiList) {
                     if (nilai.getId_Alternatif() == alternatif.getId() && nilai.getId_Kriteria() == kriteriaList.get(j).getId()) {
                         for (SubKriteria subKriteria : subKriteriaList) {
@@ -330,8 +331,8 @@ public class index {
                 }
                 totalNilai += nilaiSubKriteria;
             }
-
-            nilaiRataRata[j] = 1.0 / (alternatifList.size() * totalNilai);
+            // Menghitung nilai rata-rata berdasarkan jumlah alternatif
+            nilaiRataRata[j] = totalNilai / alternatifList.size();
         }
         return nilaiRataRata;
     }
@@ -344,11 +345,12 @@ public class index {
             double[][] MinMax,
             double[] nilaiRataRata
     ) {
-        System.out.println("");
         ArrayList<PSI> nilaiVariasiPreferensi = new ArrayList<>();
+
         for (int i = 0; i < alternatifList.size(); i++) {
             Alternatif alternatif = alternatifList.get(i);
             double[] kriteriaNilai = new double[kriteriaList.size()];
+
             for (int j = 0; j < kriteriaList.size(); j++) {
                 for (Nilai nilai : nilaiList) {
                     if (nilai.getId_Alternatif() == alternatif.getId() && nilai.getId_Kriteria() == kriteriaList.get(j).getId()) {
@@ -357,7 +359,6 @@ public class index {
                                 if (kriteriaList.get(j).getJenis().equals("Benefit")) {
                                     double max = subKriteria.getBobot() / MinMax[0][j];
                                     kriteriaNilai[j] = Math.pow(max - nilaiRataRata[j], 2);
-                                    System.out.println("K" + (j + 1) + " (" + max + " - " + nilaiRataRata[j] + ")^2" + " = " + Math.pow(max - nilaiRataRata[j], 2));
                                 } else {
                                     double min = MinMax[1][j] / subKriteria.getBobot();
                                     kriteriaNilai[j] = Math.pow(nilaiRataRata[j] - min, 2);
@@ -368,10 +369,11 @@ public class index {
                     }
                 }
             }
+
             PSI psi = new PSI(alternatif.getNama(), kriteriaNilai);
-            System.out.println("");
             nilaiVariasiPreferensi.add(psi);
         }
+
         return nilaiVariasiPreferensi;
     }
 
@@ -417,6 +419,8 @@ public class index {
         // Menghitung nilai preferensi
         for (int i = 0; i < jumlahKriteria; i++) {
             nilaiPreferensi[i] = 1 - totalVariasiPreferensi[i];
+            System.out.print(1 + " - " + totalVariasiPreferensi[i]);
+            System.out.println(" = " + nilaiPreferensi[i]);
             total += nilaiPreferensi[i];
             System.out.println(nilaiPreferensi[i] + " + ");
         }
@@ -436,13 +440,32 @@ public class index {
         return totalnilaiPreferensi;
     }
 
+    static double[] NilaiPreferensi(double[] totalVariasiPreferensi) {
+        int jumlahKriteria = totalVariasiPreferensi.length;
+        double[] nilaiPreferensi = new double[jumlahKriteria];
+        for (int i = 0; i < jumlahKriteria; i++) {
+            nilaiPreferensi[i] = 1 - totalVariasiPreferensi[i];
+         }
+        return nilaiPreferensi;
+    }
+
     static double[] menentukanBobotKriteria(double[] totalVariasiPreferensi, double hitungTotalNilaiPreferensi) {
         int jumlahKriteria = totalVariasiPreferensi.length;
         double[] nilaiPreferensi = new double[jumlahKriteria];
-        System.out.println(hitungTotalNilaiPreferensi);
+        DecimalFormat df = new DecimalFormat("0.0000"); // Format desimal dengan 4 angka di belakang koma
+
         // Menghitung nilai preferensi
+        System.out.println("menentukan Bobot Kriteria");
         for (int i = 0; i < jumlahKriteria; i++) {
-            nilaiPreferensi[i] = totalVariasiPreferensi[i] / hitungTotalNilaiPreferensi;
+            System.out.print((1-totalVariasiPreferensi[i]) + " / " + hitungTotalNilaiPreferensi);
+            nilaiPreferensi[i] = (1-totalVariasiPreferensi[i]) / hitungTotalNilaiPreferensi;
+            System.out.println(" = " + nilaiPreferensi[i]);
+        }
+
+        // Menghitung bobot kriteria sesuai format yang diinginkan
+        for (int i = 0; i < jumlahKriteria; i++) {
+            double bobotKriteria = nilaiPreferensi[i] / hitungTotalNilaiPreferensi;
+            System.out.println("Wj=" + df.format(nilaiPreferensi[i]) + "/" + df.format(hitungTotalNilaiPreferensi) + "=" + df.format(bobotKriteria));
         }
 
         return nilaiPreferensi;

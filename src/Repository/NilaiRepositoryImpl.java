@@ -106,7 +106,6 @@ public class NilaiRepositoryImpl implements NilaiRepository {
     public ArrayList<Nilai> getByid(int id) {
         ArrayList<Nilai> nilaiList = new ArrayList<>();
         String sql = "SELECT * FROM `tbl_nilai` WHERE id_Nilai=" + id;
-        System.out.println(sql);
         try (Statement statement = conn.createStatement(); ResultSet resultset = statement.executeQuery(sql)) {
             while (resultset.next()) {
                 int id_Nilai = resultset.getInt("id_Nilai");
@@ -128,7 +127,6 @@ public class NilaiRepositoryImpl implements NilaiRepository {
     public ArrayList<Nilai> getNilaiByAlternatifId(int id) {
         ArrayList<Nilai> nilaiList = new ArrayList<>();
         String sql = "SELECT * FROM `tbl_nilai` WHERE id_Alternatif=" + id;
-        System.out.println(sql);
         try (Statement statement = conn.createStatement(); ResultSet resultset = statement.executeQuery(sql)) {
             while (resultset.next()) {
                 int id_Nilai = resultset.getInt("id_Nilai");

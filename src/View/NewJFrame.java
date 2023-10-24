@@ -26,6 +26,7 @@ import Service.SubKriteriaServiceImpl;
 import View.alternatif.EditAlternatif;
 import View.alternatif.TambahAlternatif;
 import static View.index.MinMax;
+import static View.index.NilaiPreferensi;
 import static View.index.averageNormalisasiNilaiMatriks;
 import static View.index.hitungNilaiPreferensi;
 import static View.index.hitungTotalNilaiPreferensi;
@@ -1309,8 +1310,8 @@ public class NewJFrame extends javax.swing.JFrame {
         ArrayList<PSI> nilaiVariasiPreferensiList = nilaiVariasiPreferensi(alternatifList, kriteriaList, subKriteriaList, nilaiList, MinMax, nilaiRataRata);
         double[] totalNilaiVariasiPreferensi = hitungTotalTiapKriteria(nilaiVariasiPreferensiList);
         double[] hitungNilaiPreferensi = hitungNilaiPreferensi(totalNilaiVariasiPreferensi);
-        double totalHitungNilaiPreferensi = hitungTotalNilaiPreferensi(totalNilaiVariasiPreferensi);
         double totalNilaiDalamPreferensi = totalNilaiDalamPreferensi(totalNilaiVariasiPreferensi);
+        double[] NilaiPreferensi = NilaiPreferensi(totalNilaiVariasiPreferensi);
         double[] menentukanBobotKriteria = menentukanBobotKriteria(totalNilaiVariasiPreferensi, totalNilaiDalamPreferensi);
         ArrayList<PSI> menghitungNilaiPreferensi = menghitungNilaiPreferensi(alternatifList, kriteriaList, subKriteriaList, nilaiList, MinMax, menentukanBobotKriteria);
 
@@ -1335,7 +1336,7 @@ public class NewJFrame extends javax.swing.JFrame {
 
         for (int i = 0; i < menghitungNilaiPreferensi.size(); i++) {
             PSI psi = menghitungNilaiPreferensi.get(i);
-            Object[] rowData = new Object[kriteriaList.size() + 4];
+            Object[] rowData = new Object[kriteriaList.size() + 3]; // Periksa jumlah kolom di sini
             rowData[0] = nomor;
             rowData[1] = psi.getAlternatif();
             double[] kriteriaNilai = psi.getBobotKriteria();
@@ -1348,10 +1349,11 @@ public class NewJFrame extends javax.swing.JFrame {
                 total += nilai;
             }
 
-            rowData[menghitungNilaiPreferensi.size() + 3] = total;
+            rowData[kriteriaList.size() + 2] = total; // Periksa indeks di sini
             DftTblModel_perhitungan.addRow(rowData);
             nomor++;
         }
+
     }
 
     public void showHasilAkhir() {
